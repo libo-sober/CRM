@@ -1,0 +1,27 @@
+{% extends 'starter.html' %}
+
+{% block son_content %}
+    {{ label }}
+{% endblock %}
+
+{% block content %}
+    <form class="form-horizontal" method="post" novalidate>
+    {% csrf_token %}
+        {% for field in customer_form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}" class="col-sm-2 control-label">{{ field.label }}</label>
+                <div class="col-sm-6">
+                    {{ field }}
+                </div>
+                <div class="col-sm-4">
+                    <span style="color: red">{{ field.errors.0 }}</span>
+                </div>
+            </div>
+        {% endfor %}
+    <div class="col-sm-6 offset-8">
+        <button class="btn btn-success">提交</button>
+        </div>
+    </form>
+
+
+{% endblock content %}

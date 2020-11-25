@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.safestring import mark_safe
 # Create your models here.
 
 
@@ -32,14 +33,14 @@ class Role(models.Model):
 
 class CustomerInfo(models.Model):
     """客户信息"""
-    name = models.CharField(max_length=32, default=None)
+    name = models.CharField(max_length=32, default=None, verbose_name='名称')
     contact_type_choices = (
         ('0', 'qq'),
         ('1', '微信'),
         ('2', '手机'),
     )
-    contact_type = models.CharField(choices=contact_type_choices, default='0', max_length=16)
-    contact = models.CharField(max_length=64, unique=True)
+    contact_type = models.CharField(choices=contact_type_choices, default='0', max_length=16, verbose_name='联系方式')
+    contact = models.CharField(max_length=64, unique=True, verbose_name='号码')
 
     source_choices = (
         ('0', 'QQ群'),
@@ -50,25 +51,35 @@ class CustomerInfo(models.Model):
         ('5', '其他'),
     )
 
-    source = models.CharField(choices=source_choices, max_length=16)
+    source = models.CharField(choices=source_choices, max_length=16, verbose_name='来源')
     referral_from = models.ForeignKey('self', null=True, blank=True, verbose_name='转介绍', on_delete=models.CASCADE)
 
     consult_courses = models.ForeignKey('Course', verbose_name='咨询课程', null=True, blank=True)
-    consult_content = models.TextField(verbose_name='咨询内容')
+    consult_content = models.TextField(verbose_name='咨询内容')  # blank=True, null=True加上这个校验时就允许为空
     status_choices = (
         ('0', '未报名'),
         ('1', '已报名'),
         ('2', '已退学'),
     )
-    status = models.CharField(choices=status_choices, max_length=16)
+    status = models.CharField(choices=status_choices, max_length=16, verbose_name='状态')
     consultant = models.ForeignKey('UserInfo', verbose_name='课程顾问', on_delete=models.CASCADE, blank=True, null=True)
     date = models.DateField(auto_now_add=True)
 
     class Meta:
-        verbose_name_plural = '客户信息表'
+        ordering = ['-id']  # 按id值倒序排列,等同于查询时customer_obj = models.CustomerInfo.objects.all().reverse() 注意后边加上了reverse()
+        verbose_name_plural = '客户信息表'  # verbose_name会加上s,这个不hi
 
     def __str__(self):
         return self.name
+
+    def show_status(self):
+        # 设置每个状态的颜色
+        status_color = {
+            '0': 'blue',
+            '1': 'green',
+            '2': 'red',
+        }
+        return mark_safe(f"<span style='color:{status_color[self.status]}'>{self.get_status_display()}</span>")
 
 
 class Student(models.Model):

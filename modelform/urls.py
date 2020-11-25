@@ -22,4 +22,7 @@ urlpatterns = [
     url(r'^register/', views.RegisterView.as_view(), name='register'),
     url(r'^home/', views.HomeView.as_view(), name='home'),
     url(r'^customer/', views.CustomerView.as_view(), name='customer'),
+    # url(r'^add_customer/', views.AddCustomerView.as_view(), name='add_customer'),
+    url(r'^add_customer/', views.AddEditCustomer.as_view(), name='add_customer'),
+    url(r'^edit_customer/(\d+)/', views.AddEditCustomer.as_view(), name='edit_customer'),
 ]

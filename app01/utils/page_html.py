@@ -35,6 +35,8 @@ class MyPagination:
     def html_page(self):
         page_html = '<div class="container"><div class="row"><div class="row-cols-8 offset-2"><nav aria-label="Page navigation"><ul class="pagination">'
 
+        first_page = f'<li><a href="{self.base_url}?page=1" aria-label="Previous"><span style="font-size: 25px" aria-hidden="true">首页</span></a></li>'
+        page_html += first_page
         if self.page_id <= 1:
             page_pre = f'<li class="disabled"><a href="javascript:void(0)" aria-label="Previous"><span style="font-size: 25px" aria-hidden="true">&laquo;</span></a></li>'
         else:
@@ -50,6 +52,8 @@ class MyPagination:
         else:
             page_last = f'<li><a href="{self.base_url}?page={self.page_id + 1}" aria-label="Next"><span style="font-size: 25px" aria-hidden="true">&raquo;</span></a></li>'
         page_html += page_last
+        last_page = f'<li><a href="{self.base_url}?page={self.page}" aria-label="Previous"><span style="font-size: 25px" aria-hidden="true">尾页</span></a></li>'
+        page_html += last_page
         page_html += '</ul></nav></div></div></div>'
         # mark_safe()后端包裹后，前端就不要safe过滤了，自动识别成标签
         return mark_safe(page_html)

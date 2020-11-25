@@ -1,6 +1,7 @@
 {% extends 'starter.html' %}
 {% load static %}
 {% block content %}
+    <h3><a href="{% url 'add_customer' %}">添加客户</a></h3>
     <table class="table table-hover table-bordered">
         <thead>
         <tr>
@@ -14,6 +15,7 @@
             <td>课程顾问</td>
             <td>咨询日期</td>
             <td>咨询内容</td>
+            <td>操作</td>
         </tr>
         </thead>
         <tbody>
@@ -26,10 +28,11 @@
                 <td>{{ customer.contact }}</td>
                 <td>{{ customer.get_source_display }}</td>
                 <td>{{ customer.referral_from.name }}</td>
-                <td>{{ customer.get_status_display }}</td>
+                <td>{{ customer.show_status }}</td>
                 <td>{{ customer.consultant.username }}</td>
                 <td>{{ customer.date }}</td>
                 <td>{{ customer.consult_content }}</td>
+                <td><a href="{% url 'edit_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>
             </tr>
         {% endfor %}
         </tbody>

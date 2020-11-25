@@ -147,3 +147,79 @@ class CustomerView(View):
         customer_obj = models.CustomerInfo.objects.all()[(html_obj.page_id - 1) * html_obj.record:html_obj.page_id * html_obj.record]
         # print(page_id)
         return render(request, 'customer.html', {'customer_obj': customer_obj, 'page_html': html_obj.html_page(), })
+
+
+class CustomerForm(forms.ModelForm):
+
+    class Meta:
+        model = models.CustomerInfo
+        fields = '__all__'
+        error_messages = {
+            'name': {'required': '不能为空！'},
+            'contact_type': {'required': '不能为空！'},
+            'contact': {'required': '不能为空！'},
+            'source': {'required': '不能为空！'},
+            'consult_content': {'required': '不能为空！'},
+            'status': {'required': '不能为空！'},
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            from django.forms.fields import DateField
+            # 如果是日期，换成类型位日期类型的输入框
+            if isinstance(field, DateField):
+                field.widget.attrs.update({'type': 'date'})
+            field.widget.attrs.update({'class': 'form-control'})
+
+
+# class AddCustomerView(View):
+#
+#     def get(self, request):
+#         customer_form = CustomerForm()
+#         return render(request, 'add_customer.html', {'customer_form': customer_form})
+#
+#     def post(self, request):
+#         customer_form = CustomerForm(request.POST)
+#         if customer_form.is_valid():
+#             customer_form.save()
+#             return redirect('customer')
+#         else:
+#             return render(request, 'add_customer.html', {'customer_form': customer_form})
+#
+#
+# class EditCustomerView(View):
+#
+#     def get(self, request, cid):
+#         customer_obj = models.CustomerInfo.objects.filter(pk=cid).first()  # filter返回的时一个QuerrySet集合，取出里边的model对象
+#         customer_form = CustomerForm(instance=customer_obj)
+#         return render(request, 'edit_customer.html', {'customer_form':customer_form})
+#
+#     def post(self, request, cid):
+#         customer_obj = models.CustomerInfo.objects.filter(pk=cid).first()
+#         customer_form = CustomerForm(request.POST, instance=customer_obj)
+#         if customer_form.is_valid():
+#             customer_form.save()
+#             return redirect('customer')
+#         else:
+#             return render(request, 'edit_customer.html', {'customer_form': customer_form})
+
+
+# 编辑和添加用户
+class AddEditCustomer(View):
+
+    def get(self, request, cid=None):
+        label = '编辑客户' if cid else '添加客户'
+        customer_obj= models.CustomerInfo.objects.filter(pk=cid).first()  # filter返回的时一个QuerrySet集合，取出里边的model对象
+        customer_form = CustomerForm(instance=customer_obj)
+        return render(request, 'add_customer.html', {'customer_form':customer_form, 'label':label})
+
+    def post(self, request, cid=None):
+        label = '编辑客户' if cid else '添加客户'
+        customer_obj = models.CustomerInfo.objects.filter(pk=cid).first()
+        customer_form = CustomerForm(request.POST, instance=customer_obj)
+        if customer_form.is_valid():
+            customer_form.save()
+            return redirect('customer')
+        else:
+            return render(request, 'add_customer.html', {'customer_form': customer_form, 'label':label})
