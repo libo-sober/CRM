@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<!-- saved from url=(0051)https://www.jq22.com/demo/jquery-Sharelink20151012/ -->
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>登陆</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<div class="login-container">
+    <h1>SuperCRM 登录页面</h1>
+    <div class="connect">
+        <p>欢迎来到老李学院</p>
+    </div>
+    <form action="" method="post" id="loginForm"
+          novalidate="novalidate">
+        {% csrf_token %}
+        <div>
+            <input type="username" name="username" class="username" placeholder="用户名" oncontextmenu="return false"
+                   onpaste="return false">
+        </div>
+        <div>
+            <input type="password" name="password" class="password" placeholder="密码" oncontextmenu="return false"
+                   onpaste="return false">
+        </div>
+        <button id="submit" type="submit">登 陆</button>
+        <span style="color: red">{{ error }}</span>
+    </form>
+</div>
+<a href="{% url 'register' %}">
+    <button type="button" class="register-tis">还有没有账号？</button>
+</a>
+</div>
+
+<script src="{% static 'js/jquery.min.js' %}"></script>
+{#<script src="./登陆丨Sharelink_files/jquery.min.js(1).下载"></script>#}
+<script src="{% static 'js/common.js' %}"></script>
+
+<script src="{% static 'js/supersized.3.2.7.min.js' %}"></script>
+<script src="{% static 'js/supersized-init.js' %}"></script>
+
+<script src="{% static 'js/jquery.validate.min.js' %}"></script>
+
+</body>
+</html>

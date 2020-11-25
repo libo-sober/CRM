@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<!-- saved from url=(0064)https://www.jq22.com/demo/jquery-Sharelink20151012/register.html -->
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>登陆</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<div class="register-container">
+    <h1>ShareLink</h1>
+    <div class="connect">
+        <p style="left: 0%;">Link the world. Share to world.</p>
+    </div>
+    <form action="" method="post" id="registerForm"
+          novalidate="novalidate">
+    {% csrf_token %}
+        {% for field in register_form_obj %}
+            <div>
+{#                <label for="{{ field.id_for_label }}">{{ field.label }}</label>#}
+                {{ field }}
+                <span style="color: red;">{{ field.errors.0 }}</span>
+            </div>
+        {% endfor %}
+{#        <div>#}
+{#            <label for="{{ register_form_obj.username.id_for_label }}">{{ register_form_obj.username.label }}</label>#}
+{#            {{ register_form_obj.username }}#}
+{#        </div>#}
+{#        <div>#}
+{#            <label for="{{ register_form_obj.password.id_for_label }}">{{ register_form_obj.password.label }}</label>#}
+{#            {{ register_form_obj.password }}#}
+{#        </div>#}
+{#        <div>#}
+{#            <input type="password" name="confirm_password" class="confirm_password" placeholder="再次输入密码"#}
+{#                   oncontextmenu="return false" onpaste="return false">#}
+{#        </div>#}
+{#        <div>#}
+{#            <input type="text" name="phone_number" class="phone_number" placeholder="输入手机号码" autocomplete="off"#}
+{#                   id="number">#}
+{#        </div>#}
+{#        <div>#}
+{#            <input type="email" name="email" class="email" placeholder="输入邮箱地址" oncontextmenu="return false"#}
+{#                   onpaste="return false">#}
+{#        </div>#}
+        <button id="submit" type="submit">注 册</button>
+    </form>
+    <a href="{% url 'login' %}">
+        <button type="button" class="register-tis">已经有账号？</button>
+    </a>
+</div>
+
+<script src="{% static 'js/jquery.min.js' %}"></script>
+{#<script src="./登陆丨Sharelink_files/jquery.min.js(1).下载"></script>#}
+<script src="{% static 'js/common.js' %}"></script>
+
+<script src="{% static 'js/supersized.3.2.7.min.js' %}"></script>
+<script src="{% static 'js/supersized-init.js' %}"></script>
+
+<script src="{% static 'js/jquery.validate.min.js' %}"></script>
+</body>
+</html>
