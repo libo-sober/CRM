@@ -9,6 +9,9 @@ from django import forms
 
 from app01 import models
 from app01.utils.hashlib_func import set_md5
+from app01.utils.page_html import MyPagination
+from modelform import settings
+
 # Create your views here.
 
 
@@ -132,15 +135,15 @@ class CustomerView(View):
 
     def get(self, request):
         page_id = request.GET.get('page') # 获取get请求中的page数据
-        num = models.CustomerInfo.objects.all().count()
-        page_num = 10
-        a, b = divmod(num, page_num)
-        page = a if b else a
-        page_num_list = range(1, page + 1)
-        if page_id is None:
-            page_id = 1
-        else:
-            page_id = int(page_id)
-        customer_obj = models.CustomerInfo.objects.all()[(page_id - 1) * page_num:page_id * page_num]
-        print(page_id)
-        return render(request, 'customer.html', {'customer_obj': customer_obj, 'page_num_list': page_num_list, })
+        num = models.CustomerInfo.objects.all().count()  # 总共记录数
+        base_url = request.path  # 请求路径
+        # 以后直接在settings配置文件中修改即可
+        page_count = settings.PAGE_COUNT  # 页数栏显示多少个数
+        record = settings.RECORD  # 每页显示多少条记录
+        # print(base_url)
+
+        html_obj = MyPagination(page_id=page_id, num=num, base_url=base_url, page_count=page_count, record=record)
+
+        customer_obj = models.CustomerInfo.objects.all()[(html_obj.page_id - 1) * html_obj.record:html_obj.page_id * html_obj.record]
+        # print(page_id)
+        return render(request, 'customer.html', {'customer_obj': customer_obj, 'page_html': html_obj.html_page(), })

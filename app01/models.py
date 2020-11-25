@@ -53,7 +53,7 @@ class CustomerInfo(models.Model):
     source = models.CharField(choices=source_choices, max_length=16)
     referral_from = models.ForeignKey('self', null=True, blank=True, verbose_name='转介绍', on_delete=models.CASCADE)
 
-    consult_courses = models.ManyToManyField('Course', verbose_name='咨询课程', blank=True, null=True)
+    consult_courses = models.ForeignKey('Course', verbose_name='咨询课程', null=True, blank=True)
     consult_content = models.TextField(verbose_name='咨询内容')
     status_choices = (
         ('0', '未报名'),

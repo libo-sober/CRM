@@ -34,21 +34,8 @@
         {% endfor %}
         </tbody>
     </table>
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            <li>
-                <a href="#" aria-label="Previous">
-                    <span style="font-size: 30px" aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-            {% for i in page_num_list %}
-                <li style="font-size: 30px"><a href="/customer/?page={{ i }}"> {{ i }} &nbsp;</a></li>
-            {% endfor %}
-            <li>
-                <a href="#" aria-label="Next">
-                    <span style="font-size: 30px" aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+{#    自己封装的分页组件#}
+{#    {{ page_html|safe }}#}
+{#     # mark_safe()后端包裹后，前端就不要safe过滤了，自动识别成标签#}
+    {{ page_html }}
 {% endblock content %}

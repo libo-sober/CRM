@@ -133,3 +133,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'statics')
 ]
+
+PAGE_COUNT = 9  # 页数栏显示多少个数
+RECORD = 15  # 每页显示多少条记录
