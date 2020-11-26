@@ -3,9 +3,11 @@ import re
 from django.shortcuts import (
     render, HttpResponse, redirect
 )
+from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.views import View
 from django import forms
+from django.db.models import Q
 
 from app01 import models
 from app01.utils.hashlib_func import set_md5
@@ -97,6 +99,8 @@ class LoginView(View):
         user_obj = models.UserInfo.objects.filter(username=username, password=set_md5(password)).first()
         if user_obj:
             # return HttpResponse('ok')
+            # 把当前用户id添加到session中
+            request.session['user_id'] = user_obj.id
             return redirect('home')
         else:
             # return redirect('login')
@@ -128,25 +132,86 @@ class RegisterView(View):
 class HomeView(View):
 
     def get(self, request):
-        return render(request, 'home.html')
+
+        user_id = request.session.get('user_id')
+        cur_user_name = models.UserInfo.objects.get(id=user_id)
+        return render(request, 'home.html', {'cur_user_name': cur_user_name})
 
 
 class CustomerView(View):
 
     def get(self, request):
-        page_id = request.GET.get('page') # 获取get请求中的page数据
-        num = models.CustomerInfo.objects.all().count()  # 总共记录数
+
+        # print(request.GET.urlencode())  # 会直接拿到get请求根路径后边的url
+        # request.GET 拿到的是一个QuerrySet不允许修改
+        # 先不进行urlecode,因为后边会多出一个page
+        get_data = request.GET.copy()  # 直接调用这个类自己的copy方法或者deepcopy方法或者自己import copy 都可以实现内容允许修改
+        user_id = request.session.get('user_id')
+        cur_user_name = models.UserInfo.objects.get(id=user_id)
+        # print(user_id)
+        page_id = request.GET.get('page')  # 获取get请求中的page数据
+        search_field = request.GET.get('search_field')  # 获取get请求中的搜索字段
+        search = request.GET.get('search')  # 获取get请求中的搜索数据
+        contact_type_choices = {
+            'qq':'0',
+            '微信':'1',
+            '手机':'2',
+        }
+        if search_field == 'contact_type__contains':
+            if search in ['qq', '微信', '手机']:
+                search = contact_type_choices[search]
+        # print(search_field, search)
+        cur_request_path = request.path
+        if cur_request_path == reverse('my_customer'):
+            tag = 'sg'
+            cur_user_customer = models.CustomerInfo.objects.filter(consultant_id=user_id)
+        else:
+            tag = 'gs'
+            cur_user_customer = models.CustomerInfo.objects.filter(consultant_id__isnull=True)
+
+        if search:
+            #1. Q查询实现多条件查询，或者关系
+            # customer_obj_list = models.CustomerInfo.objects.filter(Q(name__contains=search) | Q(contact__contains=search))
+            # 2.**打散,and关系
+            # customer_obj_list = models.CustomerInfo.objects.filter(**{search_field:search})
+            # 3.Q的另一种方式, q_obj.connector = 'or',  不加or就是and关系
+            q_obj = Q()
+            # q_obj.connector = 'or'
+            q_obj.children.append((search_field, search))
+            # q_obj.children.append((search_field2, search2)) 同时用连个条件查询
+            customer_obj_list = cur_user_customer.filter(q_obj)
+        else:
+            customer_obj_list = cur_user_customer.all()
+
+        num = customer_obj_list.count()  # 总共记录数
+        # print(num)
         base_url = request.path  # 请求路径
         # 以后直接在settings配置文件中修改即可
         page_count = settings.PAGE_COUNT  # 页数栏显示多少个数
         record = settings.RECORD  # 每页显示多少条记录
         # print(base_url)
 
-        html_obj = MyPagination(page_id=page_id, num=num, base_url=base_url, page_count=page_count, record=record)
+        html_obj = MyPagination(page_id=page_id, num=num, base_url=base_url, get_data=get_data, page_count=page_count, record=record)
 
-        customer_obj = models.CustomerInfo.objects.all()[(html_obj.page_id - 1) * html_obj.record:html_obj.page_id * html_obj.record]
+        customer_obj = customer_obj_list[(html_obj.page_id - 1) * html_obj.record:html_obj.page_id * html_obj.record]
         # print(page_id)
-        return render(request, 'customer.html', {'customer_obj': customer_obj, 'page_html': html_obj.html_page(), })
+        return render(request, 'customer.html', {'customer_obj': customer_obj, 'page_html': html_obj.html_page(), 'cur_user_name': cur_user_name, 'tag':tag})
+
+    def post(self, request):
+        print(request.POST)
+        gs_sg = request.POST.get('gs_sg')
+        customer_ids = request.POST.getlist('customer_ids')
+        if hasattr(self, gs_sg):
+            res_obj = models.CustomerInfo.objects.filter(pk__in=customer_ids)
+            getattr(self, gs_sg)(request, res_obj)
+            return redirect(request.path)
+
+
+    def reverse_gs(self, request, res_obj):
+        res_obj.update(consultant_id=request.session.get('user_id'))
+
+    def reverse_sg(self, request, res_obj):
+        res_obj.update(consultant_id=None)
 
 
 class CustomerForm(forms.ModelForm):

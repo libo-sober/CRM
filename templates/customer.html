@@ -1,44 +1,78 @@
 {% extends 'starter.html' %}
 {% load static %}
+
+{% block username %}
+    {{ cur_user_name }}
+{% endblock %}
+
 {% block content %}
     <h3><a href="{% url 'add_customer' %}">添加客户</a></h3>
-    <table class="table table-hover table-bordered">
-        <thead>
-        <tr>
-            <td>序号</td>
-            <td>姓名</td>
-            <td>联系方式</td>
-            <td>号码</td>
-            <td>来源</td>
-            <td>转介绍人员</td>
-            <td>状态</td>
-            <td>课程顾问</td>
-            <td>咨询日期</td>
-            <td>咨询内容</td>
-            <td>操作</td>
-        </tr>
-        </thead>
-        <tbody>
-        {% for customer in customer_obj %}
+    <form method="get" class="form-inline pull-right">
+        <select name="search_field" class="form-control">
+            <option value="contact_type__contains">联系方式</option>
+            <option value="name__contains">姓名</option>
+            <option value="contact__contains">号码</option>
+        </select>
+        <div class="form-group">
+            <input type="text" class="form-control" name="search" placeholder="请输入搜索的内容">
+        </div>
+        <button type="submit" class="btn btn-default">搜索</button>
+    </form>
+    <form class="form-inline pull-left" method="post">
+    {% csrf_token %}
+        <select name="gs_sg" class="form-control">
+            {% if tag == 'gs' %}
+            <option value="reverse_gs">公户转私户</option>
+            {% else %}
+            <option value="reverse_sg">私户转公户</option>
+            {% endif %}
+        </select>
+
+        <button class="btn btn-warning">go</button>
+
+
+        <table class="table table-hover table-bordered">
+            <thead>
             <tr>
-                {#        <td>{{ forloop.counter }}</td>#}
-                <td>{{ customer.id }}</td>
-                <td>{{ customer.name }}</td>
-                <td>{{ customer.get_contact_type_display }}</td>
-                <td>{{ customer.contact }}</td>
-                <td>{{ customer.get_source_display }}</td>
-                <td>{{ customer.referral_from.name }}</td>
-                <td>{{ customer.show_status }}</td>
-                <td>{{ customer.consultant.username }}</td>
-                <td>{{ customer.date }}</td>
-                <td>{{ customer.consult_content }}</td>
-                <td><a href="{% url 'edit_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>
+                <td><input type="checkbox">选择</td>
+                <td>序号</td>
+                <td>姓名</td>
+                <td>联系方式</td>
+                <td>号码</td>
+                <td>来源</td>
+                <td>转介绍人员</td>
+                <td>状态</td>
+                <td>课程顾问</td>
+                <td>咨询日期</td>
+                <td>咨询内容</td>
+                <td>操作</td>
             </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-{#    自己封装的分页组件#}
-{#    {{ page_html|safe }}#}
-{#     # mark_safe()后端包裹后，前端就不要safe过滤了，自动识别成标签#}
-    {{ page_html }}
+            </thead>
+            <tbody>
+            {% for customer in customer_obj %}
+
+                <tr>
+                    <td><input type="checkbox" value="{{ customer.id }}" name="customer_ids"></td>
+                    <td>{{ forloop.counter }}</td>
+                    {#                <td>{{ customer.id }}</td>#}
+                    <td>{{ customer.name }}</td>
+                    <td>{{ customer.get_contact_type_display }}</td>
+                    <td>{{ customer.contact }}</td>
+                    <td>{{ customer.get_source_display }}</td>
+                    <td>{{ customer.referral_from.name|default:'无' }}</td>
+                    <td>{{ customer.show_status }}</td>
+                    <td>{{ customer.consultant.username|default:'无' }}</td>
+                    <td>{{ customer.date }}</td>
+                    <td>{{ customer.consult_content }}</td>
+                    <td><a href="{% url 'edit_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>
+                </tr>
+
+            {% endfor %}
+            </tbody>
+        </table>
+        {#    自己封装的分页组件#}
+        {#    {{ page_html|safe }}#}
+        {#     # mark_safe()后端包裹后，前端就不要safe过滤了，自动识别成标签#}
+        {{ page_html }}
+    </form>
 {% endblock content %}
