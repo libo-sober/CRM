@@ -107,6 +107,13 @@ class LoginView(View):
             return render(request, 'login.html', {'error': '用户名或密码错误！'})
 
 
+class LoginOutView(View):
+
+    def get(self, request):
+        request.session.flush()  # 清楚所有的cookie和session
+        return redirect('login')
+
+
 class RegisterView(View):
 
     def get(self, request):
@@ -163,10 +170,10 @@ class CustomerView(View):
         # print(search_field, search)
         cur_request_path = request.path
         if cur_request_path == reverse('my_customer'):
-            tag = 'sg'
+            tag1 = 'sg'
             cur_user_customer = models.CustomerInfo.objects.filter(consultant_id=user_id)
         else:
-            tag = 'gs'
+            tag1 = 'gs'
             cur_user_customer = models.CustomerInfo.objects.filter(consultant_id__isnull=True)
 
         if search:
@@ -195,7 +202,7 @@ class CustomerView(View):
 
         customer_obj = customer_obj_list[(html_obj.page_id - 1) * html_obj.record:html_obj.page_id * html_obj.record]
         # print(page_id)
-        return render(request, 'customer.html', {'customer_obj': customer_obj, 'page_html': html_obj.html_page(), 'cur_user_name': cur_user_name, 'tag':tag})
+        return render(request, 'customer.html', {'customer_obj': customer_obj, 'page_html': html_obj.html_page(), 'cur_user_name': cur_user_name, 'tag1':tag1})
 
     def post(self, request):
         print(request.POST)
@@ -283,8 +290,10 @@ class AddEditCustomer(View):
         label = '编辑客户' if cid else '添加客户'
         customer_obj = models.CustomerInfo.objects.filter(pk=cid).first()
         customer_form = CustomerForm(request.POST, instance=customer_obj)
+        next_url = request.GET.get('next')
+        # print(next_url)
         if customer_form.is_valid():
             customer_form.save()
-            return redirect('customer')
+            return redirect(next_url)
         else:
             return render(request, 'add_customer.html', {'customer_form': customer_form, 'label':label})

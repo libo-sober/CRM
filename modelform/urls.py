@@ -19,6 +19,7 @@ from app01 import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login/', views.LoginView.as_view(), name='login'),
+    url(r'^login_out/', views.LoginOutView.as_view(), name='login_out'),
     url(r'^register/', views.RegisterView.as_view(), name='register'),
     url(r'^home/', views.HomeView.as_view(), name='home'),
     url(r'^customer/', views.CustomerView.as_view(), name='customer'),

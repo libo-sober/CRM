@@ -48,6 +48,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 自定义中间件
+    'app01.utils.loginmiddleware.MyLoginAuth',
 ]
 
 ROOT_URLCONF = 'modelform.urls'
@@ -135,4 +137,4 @@ STATICFILES_DIRS = [
 ]
 
 PAGE_COUNT = 9  # 页数栏显示多少个数
-RECORD = 15  # 每页显示多少条记录
+RECORD = 10  # 每页显示多少条记录
