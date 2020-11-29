@@ -198,13 +198,19 @@ class FollowCustomerForm(forms.ModelForm):
     class Meta:
         model = models.CustomerFollowUp
         fields = '__all__'
+        exclude = ['delete_status', ]
 
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
             field.widget.attrs.update({'class': 'form-control'})
-
+            # modelform默认会生成这个外键关联的表的所有信息，就是models.CustomerInfo.objects.all()
+            # 我们只想显示当前用户下的客户信息
+            if field_name == 'customer':
+                field.queryset = models.CustomerInfo.objects.filter(consultant=request.user_obj)
+            elif field_name == 'user':
+                field.choices = ((request.user_obj.id, request.user_obj.username),)
 
 # 添加和编辑跟进客户信息
 class AddEditFollowCustomerView(View):
@@ -213,7 +219,7 @@ class AddEditFollowCustomerView(View):
         label = '编辑跟进客户' if cid else '添加跟进客户'
         follow_customer_obj= models.CustomerFollowUp.objects.filter(user=request.user_obj, delete_status=0, customer_id=cid).first()  # filter返回的时一个QuerrySet集合，取出里边的model对象
         # print(follow_customer_obj, cid)
-        follow_customer_form = FollowCustomerForm(instance=follow_customer_obj)
+        follow_customer_form = FollowCustomerForm(request, instance=follow_customer_obj)
         return render(request, 'add_follow_customer.html', {'follow_customer_form':follow_customer_form, 'label':label})
 
     def post(self, request, cid=None):
