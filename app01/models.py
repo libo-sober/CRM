@@ -108,13 +108,18 @@ class CustomerFollowUp(models.Model):
         (3, '已报名'),
     )
     status = models.SmallIntegerField(choices=status_choices)
+    delete_status_choices = (
+        (0, '未删除'),
+        (1, '已删除')
+    )
+    delete_status = models.SmallIntegerField(choices=delete_status_choices, default=0)
     date = models.DateField(auto_now_add=True)
 
     class Meta:
         verbose_name_plural = '客户跟踪记录表'
 
     def __str__(self):
-        return self.content
+        return self.customer.name + str(self.customer.id)
 
 
 class Course(models.Model):

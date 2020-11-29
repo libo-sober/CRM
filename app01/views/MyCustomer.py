@@ -84,7 +84,7 @@ class CustomerView(View):
         return render(request, 'customer.html', {'customer_obj': customer_obj, 'page_html': html_obj.html_page(), 'cur_user_name': cur_user_name, 'tag1':tag1})
 
     def post(self, request):
-        print(request.POST)
+        # print(request.POST, request.path)
         gs_sg = request.POST.get('gs_sg')
         customer_ids = request.POST.getlist('customer_ids')
         if hasattr(self, gs_sg):
@@ -139,10 +139,13 @@ class AddEditCustomer(View):
         customer_obj = models.CustomerInfo.objects.filter(pk=cid).first()
         customer_form = CustomerForm(request.POST, instance=customer_obj)
         next_url = request.GET.get('next')
-        # print(next_url)
+        print(next_url)
         if customer_form.is_valid():
             customer_form.save()
-            return redirect(next_url)
+            if next_url:
+                return redirect(next_url)
+            else:
+                return redirect('customer')
         else:
             return render(request, 'add_customer.html', {'customer_form': customer_form, 'label':label})
 
@@ -151,7 +154,79 @@ class AddEditCustomer(View):
 class FollowCustomerView(View):
 
     def get(self, request):
+        get_data = request.GET.copy()
+        cur_user_name = request.user_obj.username
+        cid = request.GET.get('cid')
+        page_id = request.GET.get('page')  # 获取get请求中的page数据
+        search_field = request.GET.get('search_field')  # 获取get请求中的搜索字段
+        search = request.GET.get('search')  # 获取get请求中的搜索数据
+        # print(search)
+        # print(cid)
+        if cid:
+            cur_follow_customer = models.CustomerFollowUp.objects.filter(user=request.user_obj, delete_status=0, customer_id=cid)
+        else:
+            cur_follow_customer = models.CustomerFollowUp.objects.filter(user=request.user_obj, delete_status=0)
+        if search:
+            q_obj = Q()
+            q_obj.children.append((search_field, search))
+            customer_obj_list = cur_follow_customer.filter(q_obj)
+        else:
+            customer_obj_list = cur_follow_customer.all()
 
-        follow_customer = models.CustomerFollowUp.objects.all()
+        num = customer_obj_list.count()  # 总共记录数
+        # print(num)
+        base_url = request.path  # 请求路径
+        page_count = settings.PAGE_COUNT  # 页数栏显示多少个数
+        record = settings.RECORD  # 每页显示多少条记录
 
-        return render(request, 'follow_customer.html', {'follow_customer': follow_customer})
+        html_obj = MyPagination(page_id=page_id, num=num, base_url=base_url, get_data=get_data, page_count=page_count, record=record)
+
+        follow_customer = customer_obj_list[(html_obj.page_id - 1) * html_obj.record:html_obj.page_id * html_obj.record]
+        return render(request, 'follow_customer.html', {'follow_customer': follow_customer, 'page_html': html_obj.html_page(), 'cur_user_name': cur_user_name,})
+
+    def post(self, request):
+
+        print(request.POST)
+        customer_ids = request.POST.getlist('customer_ids')
+        models.CustomerFollowUp.objects.filter(customer_id__in=customer_ids).delete()
+
+        return redirect(request.path)
+
+# 跟进客户modelform
+class FollowCustomerForm(forms.ModelForm):
+
+    class Meta:
+        model = models.CustomerFollowUp
+        fields = '__all__'
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'form-control'})
+
+
+# 添加和编辑跟进客户信息
+class AddEditFollowCustomerView(View):
+
+    def get(self, request, cid=None):
+        label = '编辑跟进客户' if cid else '添加跟进客户'
+        follow_customer_obj= models.CustomerFollowUp.objects.filter(user=request.user_obj, delete_status=0, customer_id=cid).first()  # filter返回的时一个QuerrySet集合，取出里边的model对象
+        # print(follow_customer_obj, cid)
+        follow_customer_form = FollowCustomerForm(instance=follow_customer_obj)
+        return render(request, 'add_follow_customer.html', {'follow_customer_form':follow_customer_form, 'label':label})
+
+    def post(self, request, cid=None):
+        label = '编辑跟进客户' if cid else '添加跟进客户'
+        follow_customer_obj = models.CustomerFollowUp.objects.filter(user=request.user_obj, delete_status=0, customer_id=cid).first()
+        follow_customer_form = FollowCustomerForm(request.POST, instance=follow_customer_obj)
+        next_url = request.GET.get('next')
+        # print(next_url)
+        if follow_customer_form.is_valid():
+            follow_customer_form.save()
+            if next_url:
+                return redirect(next_url)
+            else:
+                return redirect('follow_customer')
+        else:
+            return render(request, 'add_customer.html', {'follow_customer_form': follow_customer_form, 'label':label})

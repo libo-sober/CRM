@@ -48,7 +48,8 @@
                 <td>状态</td>
                 <td>课程顾问</td>
                 <td>咨询日期</td>
-                <td>咨询内容</td>
+                <td>咨询内容
+                <td>跟进记录</td>
                 <td>操作</td>
             </tr>
             </thead>
@@ -68,6 +69,7 @@
                     <td>{{ customer.consultant.username|default:'无' }}</td>
                     <td>{{ customer.date }}</td>
                     <td>{{ customer.consult_content }}</td>
+                    <td><a href="{% url 'follow_customer' %}?cid={{ customer.id }}">查看详情</a></td>
 {#                    <td><a href="{% url 'edit_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>#}
                     <td><a href="{% resolve_url request 'edit_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>
                 </tr>

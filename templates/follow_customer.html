@@ -6,13 +6,13 @@
 {% endblock %}
 
 {% block content %}
+    <h3><a href="{% url 'add_follow_customer' %}">添加跟进客户</a></h3>
     {% load my_tags %}
 
     <form method="get" class="form-inline pull-right">
         <select name="search_field" class="form-control">
-            <option value="contact_type__contains">联系方式</option>
-            <option value="name__contains">姓名</option>
-            <option value="contact__contains">号码</option>
+            <option value="customer__name__contains">客户名</option>
+            <option value="customer__name__contains">跟进人</option>
         </select>
         <div class="form-group">
             <input type="text" class="form-control" name="search" placeholder="请输入搜索的内容">
@@ -21,10 +21,16 @@
     </form>
     <form class="form-inline pull-left" method="post">
     {% csrf_token %}
+            <select name="delete_follow_customer" class="form-control">
+<option value="delete_all">删除</option>
+        </select>
+
+        <button class="btn btn-warning">go</button>
+
         <table class="table table-hover table-bordered">
             <thead>
             <tr>
-                <td><input type="checkbox">选择</td>
+ <td><input type="checkbox">选择</td>
                 <td>序号</td>
                 <td>姓名</td>
                 <td>跟进内容</td>
@@ -38,7 +44,7 @@
             {% for customer in follow_customer %}
 
                 <tr>
-                    <td><input type="checkbox" value="{{ customer.id }}" name="customer_ids"></td>
+                <td><input type="checkbox" value="{{ customer.customer.id }}" name="customer_ids"></td>
                     <td>{{ forloop.counter }}</td>
                     {#                <td>{{ customer.id }}</td>#}
                     <td>{{ customer.customer }}</td>
@@ -47,7 +53,8 @@
                     <td>{{ customer.get_status_display }}</td>
                     <td>{{ customer.date }}</td>
 {#                    <td><a href="{% url 'edit_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>#}
-                    <td><a href="{% resolve_url request 'edit_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>
+{#                    <td><a href="{% resolve_url request 'add_follow_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>#}
+                    <td><a href="{% resolve_url request 'edit_follow_customer' customer.customer.id %}"><i class="fa fa-edit"></i></a></td>
                 </tr>
 
             {% endfor %}
