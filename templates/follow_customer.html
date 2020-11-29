@@ -1,0 +1,61 @@
+{% extends 'starter.html' %}
+{% load static %}
+
+{% block username %}
+    {{ request.user_obj.username }}
+{% endblock %}
+
+{% block content %}
+    {% load my_tags %}
+
+    <form method="get" class="form-inline pull-right">
+        <select name="search_field" class="form-control">
+            <option value="contact_type__contains">联系方式</option>
+            <option value="name__contains">姓名</option>
+            <option value="contact__contains">号码</option>
+        </select>
+        <div class="form-group">
+            <input type="text" class="form-control" name="search" placeholder="请输入搜索的内容">
+        </div>
+        <button type="submit" class="btn btn-default">搜索</button>
+    </form>
+    <form class="form-inline pull-left" method="post">
+    {% csrf_token %}
+        <table class="table table-hover table-bordered">
+            <thead>
+            <tr>
+                <td><input type="checkbox">选择</td>
+                <td>序号</td>
+                <td>姓名</td>
+                <td>跟进内容</td>
+                <td>跟进人</td>
+                <td>状态</td>
+                <td>跟进日期</td>
+                <td>操作</td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for customer in follow_customer %}
+
+                <tr>
+                    <td><input type="checkbox" value="{{ customer.id }}" name="customer_ids"></td>
+                    <td>{{ forloop.counter }}</td>
+                    {#                <td>{{ customer.id }}</td>#}
+                    <td>{{ customer.customer }}</td>
+                    <td>{{ customer.content }}</td>
+                    <td>{{ customer.user.username }}</td>
+                    <td>{{ customer.get_status_display }}</td>
+                    <td>{{ customer.date }}</td>
+{#                    <td><a href="{% url 'edit_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>#}
+                    <td><a href="{% resolve_url request 'edit_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>
+                </tr>
+
+            {% endfor %}
+            </tbody>
+        </table>
+        {#    自己封装的分页组件#}
+        {#    {{ page_html|safe }}#}
+        {#     # mark_safe()后端包裹后，前端就不要safe过滤了，自动识别成标签#}
+        {{ page_html }}
+    </form>
+{% endblock content %}

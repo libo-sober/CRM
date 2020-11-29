@@ -12,16 +12,16 @@ if __name__ == '__main__':
             names.append(line.strip())
     print(len(names))
     customer_obj = []
-    for i in range(200, 280):
+    for i in range(0, 90):
 
         obj = models.CustomerInfo(
-            name=names[i-200],
+            name=names[i],
             contact_type=random.randint(0, 2),
             contact=f'21321378{i}',
             source=random.randint(0, 5),
             referral_from_id=models.CustomerInfo.objects.get(id=1).id,
-            consult_courses_id=models.Course.objects.get(id=1).id,
-            consult_content='什么是'+names[i-200]+'?',
+            # consult_courses_id=models.Course.objects.get(id=1).id,
+            consult_content='什么是'+names[i]+'?',
             status=random.randint(0, 2),
             # consultant_id=models.UserInfo.objects.get(id=1).id
         )

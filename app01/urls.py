@@ -36,5 +36,7 @@ urlpatterns = [
     url(r'^add_customer/', MyCustomer.AddEditCustomer.as_view(), name='add_customer'),
     # 编辑客户信息
     url(r'^edit_customer/(\d+)/', MyCustomer.AddEditCustomer.as_view(), name='edit_customer'),
+    # 跟进记录
+    url(r'^follow_customer/', MyCustomer.FollowCustomerView.as_view(), name='follow_customer'),
 
 ]

@@ -188,13 +188,19 @@ scratch. This page gets rid of all links and provides the needed markup only.
               <li class="nav-item">
                 <a href="{% url 'customer' %}" class="nav-link active">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>公户</p>
+                  <p>公共客户</p>
                 </a>
               </li>
               <li class="nav-item">
                 <a href="{% url 'my_customer' %}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>私户</p>
+                  <p>我的客户</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'follow_customer' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>跟进记录</p>
                 </a>
               </li>
             </ul>

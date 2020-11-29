@@ -145,3 +145,13 @@ class AddEditCustomer(View):
             return redirect(next_url)
         else:
             return render(request, 'add_customer.html', {'customer_form': customer_form, 'label':label})
+
+
+# 跟进记录
+class FollowCustomerView(View):
+
+    def get(self, request):
+
+        follow_customer = models.CustomerFollowUp.objects.all()
+
+        return render(request, 'follow_customer.html', {'follow_customer': follow_customer})
