@@ -113,7 +113,7 @@ class CustomerFollowUp(models.Model):
         (1, '已删除')
     )
     delete_status = models.SmallIntegerField(choices=delete_status_choices, default=0)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name_plural = '客户跟踪记录表'
@@ -168,7 +168,7 @@ class ClassList(models.Model):
 
 class CourseRecord(models.Model):
     """上课记录"""
-
+    name = models.ForeignKey('CustomerInfo', verbose_name='姓名', default=None)
     class_grade = models.ForeignKey('ClassList', verbose_name='上课班级', on_delete=models.CASCADE)
     day_num = models.PositiveSmallIntegerField('课程节次')
     teacher = models.ForeignKey('UserInfo', on_delete=models.CASCADE)
@@ -255,3 +255,25 @@ class Menus(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class StudentEnrollment(models.Model):
+    """
+    学员报名表
+    """
+    why_us = models.CharField(verbose_name='为甚么加入', max_length=112)
+    target = models.CharField(verbose_name='目标', max_length=112)
+    customer = models.ForeignKey('CustomerInfo',on_delete=models.CASCADE, verbose_name='客户名',)
+    class_grade = models.ForeignKey('ClassList',on_delete=models.CASCADE, verbose_name='班级',)
+    consultant = models.ForeignKey('UserInfo',on_delete=models.CASCADE,verbose_name='跟进人')
+    contract_agreed = models.BooleanField(default=False, verbose_name='审批状态',)
+    contract_signed_date = models.DateTimeField(blank=True,null=True, verbose_name='合同签订日期', auto_now_add=True)
+    contract_approved = models.BooleanField(default=False)
+    contract_approved_date = models.DateTimeField('合同审核时间',blank=True,null=True, auto_now_add=True)
+
+    class Meta:
+        unique_together = ('customer','class_grade')
+        verbose_name_plural = '报名表'
+
+    def __str__(self):
+        return '%s' % self.customer.name

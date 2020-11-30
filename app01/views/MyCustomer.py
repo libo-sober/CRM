@@ -1,14 +1,17 @@
 from django.shortcuts import (
-    render, redirect
+    render, redirect,
 )
 from django.urls import reverse
 from django.views import View
-from django import forms
 from django.db.models import Q
+from django.db import transaction
 
 from app01 import models
 from app01.utils.page_html import MyPagination
 from modelform import settings
+from app01.views.MyForms import (
+    CustomerForm, FollowCustomerForm, EnrollmentForm, CourseRecordForm,
+)
 
 # Create your views here.
 
@@ -88,41 +91,27 @@ class CustomerView(View):
         gs_sg = request.POST.get('gs_sg')
         customer_ids = request.POST.getlist('customer_ids')
         if hasattr(self, gs_sg):
-            res_obj = models.CustomerInfo.objects.filter(pk__in=customer_ids)
-            getattr(self, gs_sg)(request, res_obj)
+            # 反射
+            ret = getattr(self, gs_sg)(request, customer_ids)
+            if ret:
+                return ret
             return redirect(request.path)
 
-
-    def reverse_gs(self, request, res_obj):
+    def reverse_gs(self, request, customer_ids):
+        # 公转私bug修改
+        with transaction.atomic():
+            res_obj = models.CustomerInfo.objects.filter(pk__in=customer_ids, consultant_id__isnull=True).select_for_update()
+            print(res_obj)
+            if res_obj.count() != len(customer_ids):
+                tag2 = 'gs_bug'
+                tag1 = 'gs'
+                return render(request, 'customer.html', {'customer_obj': res_obj,'tag1': tag1, 'tag2': tag2})
+                # return HttpResponse('出错！')
         res_obj.update(consultant_id=request.session.get('user_id'))
 
     def reverse_sg(self, request, res_obj):
         res_obj.update(consultant_id=None)
 
-
-# 客户表单验证
-class CustomerForm(forms.ModelForm):
-
-    class Meta:
-        model = models.CustomerInfo
-        fields = '__all__'
-        error_messages = {
-            'name': {'required': '不能为空！'},
-            'contact_type': {'required': '不能为空！'},
-            'contact': {'required': '不能为空！'},
-            'source': {'required': '不能为空！'},
-            'consult_content': {'required': '不能为空！'},
-            'status': {'required': '不能为空！'},
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field_name, field in self.fields.items():
-            from django.forms.fields import DateField
-            # 如果是日期，换成类型位日期类型的输入框
-            if isinstance(field, DateField):
-                field.widget.attrs.update({'type': 'date'})
-            field.widget.attrs.update({'class': 'form-control'})
 
 
 # 编辑和添加客户信息
@@ -137,7 +126,7 @@ class AddEditCustomer(View):
     def post(self, request, cid=None):
         label = '编辑客户' if cid else '添加客户'
         customer_obj = models.CustomerInfo.objects.filter(pk=cid).first()
-        customer_form = CustomerForm(request.POST, instance=customer_obj)
+        customer_form = CustomerForm(data=request.POST, instance=customer_obj)
         next_url = request.GET.get('next')
         print(next_url)
         if customer_form.is_valid():
@@ -156,16 +145,16 @@ class FollowCustomerView(View):
     def get(self, request):
         get_data = request.GET.copy()
         cur_user_name = request.user_obj.username
-        cid = request.GET.get('cid')
+        cid = request.GET.get('cid')  # 在customer里有个查看详情的href发来的get请求携带的关键字
         page_id = request.GET.get('page')  # 获取get请求中的page数据
         search_field = request.GET.get('search_field')  # 获取get请求中的搜索字段
         search = request.GET.get('search')  # 获取get请求中的搜索数据
         # print(search)
         # print(cid)
         if cid:
-            cur_follow_customer = models.CustomerFollowUp.objects.filter(user=request.user_obj, delete_status=0, customer_id=cid)
+            cur_follow_customer = models.CustomerFollowUp.objects.filter(user=request.user_obj, delete_status=0, customer_id=cid).order_by('-date')
         else:
-            cur_follow_customer = models.CustomerFollowUp.objects.filter(user=request.user_obj, delete_status=0)
+            cur_follow_customer = models.CustomerFollowUp.objects.filter(user=request.user_obj, delete_status=0).order_by('-date')
         if search:
             q_obj = Q()
             q_obj.children.append((search_field, search))
@@ -188,29 +177,12 @@ class FollowCustomerView(View):
 
         print(request.POST)
         customer_ids = request.POST.getlist('customer_ids')
-        models.CustomerFollowUp.objects.filter(customer_id__in=customer_ids).delete()
+        obj = models.CustomerFollowUp.objects.filter(customer_id__in=customer_ids)
+        # 假删
+        obj.update(delete_status=1)
 
         return redirect(request.path)
 
-# 跟进客户modelform
-class FollowCustomerForm(forms.ModelForm):
-
-    class Meta:
-        model = models.CustomerFollowUp
-        fields = '__all__'
-        exclude = ['delete_status', ]
-
-
-    def __init__(self, request, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field_name, field in self.fields.items():
-            field.widget.attrs.update({'class': 'form-control'})
-            # modelform默认会生成这个外键关联的表的所有信息，就是models.CustomerInfo.objects.all()
-            # 我们只想显示当前用户下的客户信息
-            if field_name == 'customer':
-                field.queryset = models.CustomerInfo.objects.filter(consultant=request.user_obj)
-            elif field_name == 'user':
-                field.choices = ((request.user_obj.id, request.user_obj.username),)
 
 # 添加和编辑跟进客户信息
 class AddEditFollowCustomerView(View):
@@ -225,7 +197,7 @@ class AddEditFollowCustomerView(View):
     def post(self, request, cid=None):
         label = '编辑跟进客户' if cid else '添加跟进客户'
         follow_customer_obj = models.CustomerFollowUp.objects.filter(user=request.user_obj, delete_status=0, customer_id=cid).first()
-        follow_customer_form = FollowCustomerForm(request.POST, instance=follow_customer_obj)
+        follow_customer_form = FollowCustomerForm(request, request.POST, instance=follow_customer_obj)
         next_url = request.GET.get('next')
         # print(next_url)
         if follow_customer_form.is_valid():
@@ -235,4 +207,126 @@ class AddEditFollowCustomerView(View):
             else:
                 return redirect('follow_customer')
         else:
-            return render(request, 'add_customer.html', {'follow_customer_form': follow_customer_form, 'label':label})
+            return render(request, 'add_follow_customer.html', {'follow_customer_form': follow_customer_form, 'label':label})
+
+
+# 报名记录
+class EnrollmentView(View):
+
+    def get(self, request):
+        get_data = request.GET.copy()
+        cur_user_name = request.user_obj.username
+        cid = request.GET.get('cid')
+        page_id = request.GET.get('page')  # 获取get请求中的page数据
+        search_field = request.GET.get('search_field')  # 获取get请求中的搜索字段
+        search = request.GET.get('search')  # 获取get请求中的搜索数据
+        # print(search)
+        # print(cid)
+        if cid:
+            student_obj = models.StudentEnrollment.objects.filter(consultant=request.user_obj, customer_id=cid)
+        else:
+            student_obj = models.StudentEnrollment.objects.filter(consultant=request.user_obj,)
+        if search:
+            q_obj = Q()
+            q_obj.children.append((search_field, search))
+            customer_obj_list = student_obj.filter(q_obj)
+        else:
+            customer_obj_list = student_obj.all()
+        print(customer_obj_list)
+        num = customer_obj_list.count()  # 总共记录数
+        # print(num)
+        base_url = request.path  # 请求路径
+        page_count = settings.PAGE_COUNT  # 页数栏显示多少个数
+        record = settings.RECORD  # 每页显示多少条记录
+
+        html_obj = MyPagination(page_id=page_id, num=num, base_url=base_url, get_data=get_data, page_count=page_count, record=record)
+
+        enrollment = customer_obj_list[(html_obj.page_id - 1) * html_obj.record:html_obj.page_id * html_obj.record]
+        return render(request, 'student_enrollment.html', {'enrollment': enrollment, 'page_html': html_obj.html_page(), 'cur_user_name': cur_user_name,})
+
+
+# 添加和编辑报名记录
+class AddEditEnrollmentView(View):
+
+    def get(self, request, cid=None):
+        label = '编辑报名信息' if cid else '添加报名信息'
+        student_obj= models.StudentEnrollment.objects.filter(consultant=request.user_obj, customer_id=cid).first()  # filter返回的时一个QuerrySet集合，取出里边的model对象
+        # print(student_obj, cid)
+        enrollment_form = EnrollmentForm(request, instance=student_obj)
+        return render(request, 'add_enrollment.html', {'enrollment_form':enrollment_form, 'label':label})
+
+    def post(self, request, cid=None):
+        label = '编辑跟进客户' if cid else '添加跟进客户'
+        student_obj = models.StudentEnrollment.objects.filter(consultant=request.user_obj, customer_id=cid).first()
+        enrollment_form = EnrollmentForm(request, data=request.POST, instance=student_obj)
+        next_url = request.GET.get('next')
+        print(next_url)
+        if enrollment_form.is_valid():
+            enrollment_form.save()
+            if next_url:
+                return redirect(next_url)
+            else:
+                return redirect('student_enrollment')
+        else:
+            return render(request, 'add_enrollment.html', {'enrollment_form': enrollment_form, 'label':label})
+
+
+# 上课记录
+class CourseRecordView(View):
+
+    def get(self, request):
+        get_data = request.GET.copy()
+        cur_user_name = request.user_obj.username
+        cid = request.GET.get('cid')
+        page_id = request.GET.get('page')  # 获取get请求中的page数据
+        search_field = request.GET.get('search_field')  # 获取get请求中的搜索字段
+        search = request.GET.get('search')  # 获取get请求中的搜索数据
+        # print(search)
+        # print(cid)
+        if cid:
+            course_records_obj = models.CourseRecord.objects.filter(teacher=request.user_obj, name_id=cid)
+        else:
+            course_records_obj = models.CourseRecord.objects.filter(teacher=request.user_obj,)
+        if search:
+            q_obj = Q()
+            q_obj.children.append((search_field, search))
+            customer_obj_list = course_records_obj.filter(q_obj)
+        else:
+            customer_obj_list = course_records_obj.all()
+        # print(customer_obj_list)
+        num = customer_obj_list.count()  # 总共记录数
+        # print(num)
+        base_url = request.path  # 请求路径
+        page_count = settings.PAGE_COUNT  # 页数栏显示多少个数
+        record = settings.RECORD  # 每页显示多少条记录
+
+        html_obj = MyPagination(page_id=page_id, num=num, base_url=base_url, get_data=get_data, page_count=page_count, record=record)
+
+        course_records = customer_obj_list[(html_obj.page_id - 1) * html_obj.record:html_obj.page_id * html_obj.record]
+        return render(request, 'course_records.html', {'course_records': course_records, 'page_html': html_obj.html_page(), 'cur_user_name': cur_user_name,})
+
+
+# 编辑和添加上课记录
+class AddEditCourseRecordView(View):
+
+    def get(self, request, cid=None):
+        label = '编辑课程信息' if cid else '添加课程信息'
+        course_records_obj = models.CourseRecord.objects.filter(teacher=request.user_obj, name_id=cid).first()  # filter返回的时一个QuerrySet集合，取出里边的model对象
+        # print(student_obj, cid)
+        course_record_form = CourseRecordForm(request, instance=course_records_obj)
+        return render(request, 'add_course_record.html', {'course_record_form':course_record_form, 'label':label})
+
+    def post(self, request, cid=None):
+        label = '编辑课程信息' if cid else '添加课程信息'
+        course_records_obj = models.CourseRecord.objects.filter(teacher=request.user_obj, name_id=cid).first()
+        course_record_form = CourseRecordForm(request, data=request.POST, instance=course_records_obj)
+        next_url = request.GET.get('next')
+        # print(next_url)
+        if course_record_form.is_valid():
+            course_record_form.save()
+            if next_url:
+                return redirect(next_url)
+            else:
+                return redirect('course_records')
+        else:
+            return render(request, 'add_course_record.html', {'course_record_form': course_record_form, 'label':label})

@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    <h3><a href="{% url 'add_follow_customer' %}">添加跟进客户</a></h3>
+    <h3><a href="{% url 'add_enrollment' %}">添加报名记录</a></h3>
     {% load my_tags %}
 
     <form method="get" class="form-inline pull-right">
@@ -33,28 +33,28 @@
  <td><input type="checkbox">选择</td>
                 <td>序号</td>
                 <td>姓名</td>
-                <td>跟进内容</td>
+                <td>为啥加入</td>
+                <td>目标</td>
+                <td>班级</td>
                 <td>跟进人</td>
-                <td>状态</td>
-                <td>跟进日期</td>
                 <td>操作</td>
             </tr>
             </thead>
             <tbody>
-            {% for customer in follow_customer %}
+            {% for student in enrollment %}
 
                 <tr>
-                <td><input type="checkbox" value="{{ customer.customer.id }}" name="customer_ids"></td>
+                <td><input type="checkbox" value="{{ student.customer.id }}" name="customer_ids"></td>
                     <td>{{ forloop.counter }}</td>
                     {#                <td>{{ customer.id }}</td>#}
-                    <td>{{ customer.customer }}</td>
-                    <td>{{ customer.content }}</td>
-                    <td>{{ customer.user.username }}</td>
-                    <td>{{ customer.get_status_display }}</td>
-                    <td>{{ customer.date|date:"Y-m-d H:i:s" }}</td>
+                    <td>{{ student.customer.name}}</td>
+                    <td>{{ student.why_us }}</td>
+                    <td>{{ student.target }}</td>
+                    <td>{{ student.class_grade }}</td>
+                    <td>{{ student.consultant.username }}</td>
 {#                    <td><a href="{% url 'edit_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>#}
 {#                    <td><a href="{% resolve_url request 'add_follow_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>#}
-                    <td><a href="{% resolve_url request 'edit_follow_customer' customer.customer.id %}"><i class="fa fa-edit"></i></a></td>
+                    <td><a href="{% resolve_url request 'edit_enrollment' student.customer.id %}"><i class="fa fa-edit"></i></a></td>
                 </tr>
 
             {% endfor %}

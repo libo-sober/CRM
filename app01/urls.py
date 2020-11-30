@@ -42,5 +42,16 @@ urlpatterns = [
     url(r'^edit_follow_customer/(\d+)/', MyCustomer.AddEditFollowCustomerView.as_view(), name='edit_follow_customer'),
     # 添加跟进记录
     url(r'^add_follow_customer/', MyCustomer.AddEditFollowCustomerView.as_view(), name='add_follow_customer'),
-
+    # 添加报名记录
+    url(r'^add_enrollment/', MyCustomer.AddEditEnrollmentView.as_view(), name='add_enrollment'),
+    # 编辑报名记录
+    url(r'^edit_enrollment/(\d+)/', MyCustomer.AddEditEnrollmentView.as_view(), name='edit_enrollment'),
+    # 报名记录
+    url(r'^student_enrollment/', MyCustomer.EnrollmentView.as_view(), name='student_enrollment'),
+    # 上课记录
+    url(r'^course_records/', MyCustomer.CourseRecordView.as_view(), name='course_records'),
+    # 编辑上课记录
+    url(r'^edit_course_record/(\d+)/', MyCustomer.AddEditCourseRecordView.as_view(), name='edit_course_record'),
+    # 添加报名记录
+    url(r'^add_course_record/', MyCustomer.AddEditCourseRecordView.as_view(), name='add_course_record'),
 ]

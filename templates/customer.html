@@ -9,7 +9,11 @@
     <h3><a href="{% url 'add_customer' %}">添加客户</a></h3>
     <h3>
         {% load my_tags %}
+        {% if tag2 == 'gs_bug'%}
+            由于你操作过慢，部分客户已经被其他用户转走，在你锁选择的客户中，目前可以转为你的私户的客户信息如下：
+        {% else %}
         {% reverse_url request %}
+        {% endif %}
     </h3>
     <form method="get" class="form-inline pull-right">
         <select name="search_field" class="form-control">
