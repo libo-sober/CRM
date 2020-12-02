@@ -27,6 +27,11 @@ class LoginView(View):
             # return HttpResponse('ok')
             # 把当前用户id添加到session中
             request.session['user_id'] = user_obj.id
+            # 把权限认证封装到session中
+            permission = models.UserInfo.objects.filter(username=username).values('roles__menus__url_name').distinct()  # 身兼多职的话就去重一下
+            permission_list = list(permission)
+            request.session['permission_list'] = permission_list
+            # print(permission_list)
             return redirect('home')
         else:
             # return redirect('login')

@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.safestring import mark_safe
+
 # Create your models here.
 
 
@@ -10,6 +11,7 @@ class UserInfo(models.Model):
     email = models.EmailField()
     telephone = models.CharField(max_length=16)
     is_active = models.BooleanField(default=True)
+    roles = models.ManyToManyField(to='Role')
 
     class Meta:
         verbose_name_plural = '用户信息表'
@@ -26,6 +28,25 @@ class Role(models.Model):
 
     class Meta:
         verbose_name_plural = '角色表'
+
+    def __str__(self):
+        return self.name
+
+
+class Menus(models.Model):
+    """动态菜单"""
+    name = models.CharField('菜单名', max_length=32)
+
+    url_type_choices = (
+        (0, 'absolute'),
+        (1, 'dynamic'),
+    )
+    url_type = models.SmallIntegerField(choices=url_type_choices, default=0)
+    url_name = models.CharField('连接', max_length=128)
+
+    class Meta:
+        verbose_name_plural = '菜单'
+        unique_together = ('name', 'url_name')
 
     def __str__(self):
         return self.name
@@ -92,7 +113,7 @@ class Student(models.Model):
         verbose_name_plural = '学员表'
 
     def __str__(self):
-        return self.customer
+        return self.customer.name
 
 
 class CustomerFollowUp(models.Model):
@@ -215,7 +236,7 @@ class StudyRecord(models.Model):
         (2, '迟到'),
         (3, '早退'),
     )
-    show_status = models.SmallIntegerField(choices=show_choices)
+    show_status = models.SmallIntegerField(choices=show_choices, default=1)
     note = models.TextField('成绩备注', blank=True, null=True)
     date = models.DateTimeField(auto_now_add=True)
 
@@ -238,23 +259,7 @@ class Branch(models.Model):
         return self.name
 
 
-class Menus(models.Model):
-    """动态菜单"""
-    name = models.CharField('菜单名', max_length=32)
 
-    url_type_choices = (
-        (0, 'absolute'),
-        (1, 'dynamic'),
-    )
-    url_type = models.SmallIntegerField(choices=url_type_choices, default=0)
-    url_name = models.CharField('连接', max_length=128)
-
-    class Meta:
-        verbose_name_plural = '菜单'
-        unique_together = ('name', 'url_name')
-
-    def __str__(self):
-        return self.name
 
 
 class StudentEnrollment(models.Model):

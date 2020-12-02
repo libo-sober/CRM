@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    <h3><a href="{% url 'add_course_record' %}">添加课程记录</a></h3>
+    <h3><a href="{% url 'add_course_record' %}">添加学习记录</a></h3>
     {% load my_tags %}
 
     <form method="get" class="form-inline pull-right">
@@ -32,31 +32,34 @@
             <tr>
  <td><input type="checkbox">选择</td>
                 <td>序号</td>
-                <td>姓名</td>
+                <td>学生</td>
                 <td>班级</td>
-                <td>节次</td>
-                <td>讲师</td>
-                <td>本节主题</td>
-                <td>本节内容</td>
+                <td>成绩</td>
+                <td>签到</td>
+                <td>备注</td>
+                <td>日期</td>
                 <td>操作</td>
             </tr>
             </thead>
             <tbody>
-            {% for course_record in course_records %}
+            {% for study in formset %}
 
                 <tr>
-                <td><input type="checkbox" value="{{ course_record.name.id }}" name="customer_ids"></td>
+                <td>
+                    {{ study.id }}
+
+                    <input type="checkbox" value="" name="customer_ids"></td>
                     <td>{{ forloop.counter }}</td>
                     {#                <td>{{ customer.id }}</td>#}
-                    <td>{{ course_record.name.name}}</td>
-                    <td>{{ course_record.class_grade}}</td>
-                    <td>{{ course_record.day_num }}</td>
-                    <td>{{ course_record.teacher.username }}</td>
-                    <td>{{ course_record.title }}</td>
-                    <td>{{ course_record.content }}</td>
+                    <td>{{ study.instance.student}}</td>
+                    <td>{{ study.course_record.class_grade}}</td>
+                    <td>{{ study.score}}</td>
+                    <td>{{ study.show_status}}</td>
+                    <td>{{ study.note}}</td>
+{#                    <td>{{ study.date}}</td>#}
 {#                    <td><a href="{% url 'edit_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>#}
 {#                    <td><a href="{% resolve_url request 'add_follow_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>#}
-                    <td><a href="{% resolve_url request 'edit_course_record' course_record.name.id %}"><i class="fa fa-edit"></i></a></td>
+{#                    <td><a href="{% resolve_url request 'edit_course_record' course_record.name.id %}"><i class="fa fa-edit"></i></a></td>#}
                 </tr>
 
             {% endfor %}

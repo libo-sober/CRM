@@ -54,4 +54,6 @@ urlpatterns = [
     url(r'^edit_course_record/(\d+)/', MyCustomer.AddEditCourseRecordView.as_view(), name='edit_course_record'),
     # 添加报名记录
     url(r'^add_course_record/', MyCustomer.AddEditCourseRecordView.as_view(), name='add_course_record'),
+    # 学习记录
+    url(r'^study_record/', MyCustomer.StudyRecordView.as_view(), name='study_record'),
 ]

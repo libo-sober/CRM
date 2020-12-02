@@ -5,12 +5,12 @@ from app01 import models
 # Admin高级定制
 
 
-class UserInfoAdmin(admin.ModelAdmin):
-    list_display = ['username', 'password', 'email', 'is_active', 'telephone'] # 展示
-    list_editable = ['password', 'email', 'telephone'] # 直接修改
+# class UserInfoAdmin(admin.ModelAdmin):
+#     list_display = ['username', 'password', 'email', 'is_active', 'telephone'] # 展示
+#     list_editable = ['password', 'email', 'telephone', ] # 直接修改
 
 
-admin.site.register(models.UserInfo, UserInfoAdmin)
+admin.site.register(models.UserInfo)
 admin.site.register(models.Student)
 admin.site.register(models.Course)
 admin.site.register(models.Branch)

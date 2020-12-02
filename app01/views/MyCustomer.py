@@ -1,16 +1,17 @@
 from django.shortcuts import (
-    render, redirect,
+    render, redirect, HttpResponse,
 )
 from django.urls import reverse
 from django.views import View
 from django.db.models import Q
 from django.db import transaction
+from django.forms.models import modelformset_factory
 
 from app01 import models
 from app01.utils.page_html import MyPagination
 from modelform import settings
 from app01.views.MyForms import (
-    CustomerForm, FollowCustomerForm, EnrollmentForm, CourseRecordForm,
+    CustomerForm, FollowCustomerForm, EnrollmentForm, CourseRecordForm, StudyRecordModelForm,
 )
 
 # Create your views here.
@@ -305,6 +306,21 @@ class CourseRecordView(View):
         course_records = customer_obj_list[(html_obj.page_id - 1) * html_obj.record:html_obj.page_id * html_obj.record]
         return render(request, 'course_records.html', {'course_records': course_records, 'page_html': html_obj.html_page(), 'cur_user_name': cur_user_name,})
 
+    def post(self, request):
+
+        print(request.POST)
+        customer_ids = request.POST.getlist('customer_ids')
+        student_obj = models.Student.objects.filter(customer_id__in=customer_ids)
+        study_record_obj = []
+        for student in student_obj:
+            study = models.StudyRecord(
+                student=student,
+                course_record=models.CourseRecord.objects.get(name_id=student.customer_id),
+            )
+            study_record_obj.append(study)
+        models.StudyRecord.objects.bulk_create(study_record_obj)
+
+        return redirect(request.path)
 
 # 编辑和添加上课记录
 class AddEditCourseRecordView(View):
@@ -330,3 +346,15 @@ class AddEditCourseRecordView(View):
                 return redirect('course_records')
         else:
             return render(request, 'add_course_record.html', {'course_record_form': course_record_form, 'label':label})
+
+
+
+class StudyRecordView(View):
+
+    def get(self, request):
+        # study_record = models.StudyRecord.objects.filter(course_record_id=1).first()
+        # print(study_record)
+        # study_record_form = StudyRecordModelForm(instance=study_record)
+        formset = modelformset_factory(model=models.StudyRecord, form=StudyRecordModelForm)
+
+        return render(request, 'study_records.html', {'formset': formset, })
