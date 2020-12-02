@@ -28,3 +28,18 @@ def resolve_url(request, url_name, pk):
     # print(full_url)
     return full_url
 
+
+@register.inclusion_tag('menu.html')
+def menu(request):
+    menu_list = []
+    path = request.path
+    permission = request.session.get('permission_list')
+    for url in permission:
+        if url['roles__menus__url_type']:
+            menu_list.append(url)
+        if path == url['roles__menus__url_name']:
+            url['active'] = 'active'
+
+    # print(menu_list)
+
+    return {'menu_list': menu_list}

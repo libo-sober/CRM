@@ -31,9 +31,12 @@ class MyLoginAuth(MiddlewareMixin):
         permission_white_list = [reverse('home')]
         if path in permission_white_list:
             return
+        # print(permission)
         for url in permission:
+            pattern = '^/' + url['roles__menus__url_name'] + '$'
+
             res = re.match(url['roles__menus__url_name'], path)
-            # print(res)
+            # print(url['roles__menus__url_type'])
             # print(url['roles__menus__url_name'])
             if res:
                 return

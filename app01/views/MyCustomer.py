@@ -24,7 +24,7 @@ class HomeView(View):
 
         user_id = request.session.get('user_id')
         cur_user_name = models.UserInfo.objects.get(id=user_id)
-        return render(request, 'home.html', {'cur_user_name': cur_user_name})
+        return render(request, 'starter.html', {'cur_user_name': cur_user_name})
 
 
 # 客户处理
