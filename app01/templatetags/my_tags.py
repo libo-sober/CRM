@@ -34,12 +34,35 @@ def menu(request):
     menu_list = []
     path = request.path
     permission = request.session.get('permission_list')
+    # print('permission:', permission)
+    # print(request.current_id)
     for url in permission:
         if url['roles__menus__url_type']:
             menu_list.append(url)
-        if path == url['roles__menus__url_name']:
+        # if path == url['roles__menus__url_name']:
+        # 现在判断，你访问这个url的父级菜单如果和你当前记录的pid一样，让他处于选中状态
+        # 当前记录的pid就是 如果你是一个二级菜单，pid就是你的pk，如果你是个二级菜单下的一个子菜单，就记录你这个子菜单的parent_id,也就是它对应父级菜单的pk
+        if request.current_id == url['roles__menus__pk']:
             url['active'] = 'active'
+
+    # print('menu_list:', menu_list)
+    # 根据weight排序
+    menu_list = sorted(menu_list, key=lambda dic: dic['roles__menus__weight'], reverse=True)
 
     # print(menu_list)
 
     return {'menu_list': menu_list}
+
+
+@register.filter
+def url_button(request, name):
+    permission = request.session.get('permission_list')
+    url_name = []
+    for url in permission:
+        if url['roles__menus__url_other_name']:
+            url_name.append(url['roles__menus__url_other_name'])
+    # print(url_name)
+    if name in url_name:
+        return True
+    else:
+        return False

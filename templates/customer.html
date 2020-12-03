@@ -6,7 +6,10 @@
 {% endblock %}
 
 {% block content %}
+    {% load my_tags %}
+    {% if request|url_button:'add_customer' %}
     <h3><a href="{% url 'add_customer' %}">添加客户</a></h3>
+    {% endif %}
     <h3>
         {% load my_tags %}
         {% if tag2 == 'gs_bug'%}
@@ -54,7 +57,9 @@
                 <td>咨询日期</td>
                 <td>咨询内容
                 <td>跟进记录</td>
+                {% if request|url_button:'edit_customer' %}
                 <td>操作</td>
+                {% endif %}
             </tr>
             </thead>
             <tbody>
@@ -75,7 +80,9 @@
                     <td>{{ customer.consult_content }}</td>
                     <td><a href="{% url 'follow_customer' %}?cid={{ customer.id }}">查看详情</a></td>
 {#                    <td><a href="{% url 'edit_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>#}
+                    {% if request|url_button:'edit_customer' %}
                     <td><a href="{% resolve_url request 'edit_customer' customer.id %}"><i class="fa fa-edit"></i></a></td>
+                    {% endif %}
                 </tr>
 
             {% endfor %}

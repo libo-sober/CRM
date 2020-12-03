@@ -43,6 +43,9 @@ class Menus(models.Model):
     )
     url_type = models.SmallIntegerField(choices=url_type_choices, default=0)
     url_name = models.CharField('连接', max_length=128)
+    url_other_name = models.CharField(max_length=128, null=True, blank=True)
+    parent_id = models.ForeignKey('self', null=True, blank=True)
+    weight = models.IntegerField(default=0)
 
     class Meta:
         verbose_name_plural = '菜单'

@@ -28,7 +28,7 @@ class LoginView(View):
             # 把当前用户id添加到session中
             request.session['user_id'] = user_obj.id
             # 把权限认证封装到session中
-            permission = models.UserInfo.objects.filter(username=username).values('roles__menus__url_name', 'roles__menus__url_type', 'roles__menus__name').distinct()  # 身兼多职的话就去重一下
+            permission = models.UserInfo.objects.filter(username=username).values('roles__menus__url_name', 'roles__menus__url_type', 'roles__menus__name', 'roles__menus__weight', 'roles__menus__url_other_name', 'roles__menus__parent_id', 'roles__menus__pk').distinct()  # 身兼多职的话就去重一下
             permission_list = list(permission)
             request.session['permission_list'] = permission_list
             # print(permission_list)
