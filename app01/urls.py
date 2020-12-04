@@ -56,4 +56,6 @@ urlpatterns = [
     url(r'^add_course_record/', MyCustomer.AddEditCourseRecordView.as_view(), name='add_course_record'),
     # 学习记录
     url(r'^study_record/', MyCustomer.StudyRecordView.as_view(), name='study_record'),
+    # 权限展示
+    url(r'^role/list/', MyCustomer.RoleView.as_view(), name='role_list'),
 ]

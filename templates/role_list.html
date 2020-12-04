@@ -1,0 +1,55 @@
+{% extends 'starter.html' %}
+{% load static %}
+
+{% block username %}
+    {{ request.user_obj.username }}
+{% endblock %}
+
+{% block content %}
+
+     <form class="form-inline pull-left" method="post">
+    {% csrf_token %}
+        <select name="gs_sg" class="form-control">
+            {% if tag1 == 'gs' %}
+            <option value="reverse_gs">公户转私户</option>
+            {% else %}
+            <option value="reverse_sg">私户转公户</option>
+            {% endif %}
+        </select>
+
+        <button class="btn btn-warning">go</button>
+
+
+        <table class="table table-hover table-bordered">
+            <thead>
+            <tr>
+                <td>菜单名</td>
+                <td>路径类型</td>
+                <td>路径名</td>
+                <td>别名</td>
+                <td>父路径</td>
+                <td>权重</td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for field in menu_obj %}
+
+                <tr>
+
+                    <td>{{ field.name }}</td>
+                    <td>{{ field.get_url_type_display }}</td>
+                    <td>{{ field.url_name }}</td>
+                    <td>{{ field.url_other_name|default:"无" }}</td>
+                    <td>{{ field.parent_id|default:"无" }}</td>
+                    <td>{{ field.weight }}</td>
+
+                </tr>
+
+            {% endfor %}
+            </tbody>
+        </table>
+
+    </form>
+
+
+{% endblock content %}

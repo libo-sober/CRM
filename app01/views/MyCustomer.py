@@ -11,7 +11,7 @@ from app01 import models
 from app01.utils.page_html import MyPagination
 from modelform import settings
 from app01.views.MyForms import (
-    CustomerForm, FollowCustomerForm, EnrollmentForm, CourseRecordForm, StudyRecordModelForm,
+    CustomerForm, FollowCustomerForm, EnrollmentForm, CourseRecordForm, StudyRecordModelForm, RoleForm,
 )
 
 # Create your views here.
@@ -358,3 +358,12 @@ class StudyRecordView(View):
         formset = modelformset_factory(model=models.StudyRecord, form=StudyRecordModelForm)
 
         return render(request, 'study_records.html', {'formset': formset, })
+
+
+class RoleView(View):
+
+    def get(self, request):
+        menu_obj = models.Menus.objects.all()
+        # form = RoleForm(instance=menu_obj)
+        return render(request, 'role_list.html', {'menu_obj': menu_obj, })
+

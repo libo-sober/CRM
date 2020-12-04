@@ -170,15 +170,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <!-- Add icons to the links using the .nav-icon class
                          with font-awesome or any other icon font library -->
                     <li class="nav-item has-treeview menu-open">
-                        <a href="#" class="nav-link active">
+                        <a href="#" class="nav-link" id="dianji">
                             <i class="nav-icon fas fa-tachometer-alt"></i>
                             <p>
-                                客户
+                                客户管理
                                 <i class="right fas fa-angle-left"></i>
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
-
                             {% load my_tags %}
                             {% menu request %}
 
@@ -195,6 +194,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     </li>
                 </ul>
             </nav>
+
             <!-- /.sidebar-menu -->
         </div>
         <!-- /.sidebar -->
@@ -262,6 +262,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <!-- jQuery -->
 {#<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>#}
 <script src="{% static 'js/jquery.js' %}"></script>
+
+<script>
+    $('#dianji').click(function () {
+        $('#dianji').addClass('active');
+    })
+</script>
 
 <!-- Bootstrap 4 -->
 {#<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>#}

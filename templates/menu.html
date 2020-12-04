@@ -1,7 +1,7 @@
 {% for menu in menu_list %}
     <li class="nav-item">
-        <a href="{{ menu.roles__menus__url_name }}" class="nav-link {{menu.active}}">
-            <i class="far fa-circle nav-icon"></i>
+        <a href="{{ menu.roles__menus__url_name }}" class="nav-link {{ menu.active }}">
+            <i class="far fa-calendar nav-icon"></i>
             <p>{{ menu.roles__menus__name }}</p>
         </a>
     </li>
